@@ -49,8 +49,7 @@
 		0x00 0x00 revert
 }
 
-#define macro POP_COUNT() = takes (0) returns (0) {
-	0x04 calldataload	// [x]
+#define macro POP_COUNT() = takes (1) returns (1) {
 	dup1				// [x, x]
 	0x01 shr			// [x >> 1, x]
 	0x5555555555555555555555555555555555555555555555555555555555555555
@@ -75,10 +74,15 @@
 	dup1 0x40 shr add
 	dup1 0x80 shr add
 	0x1ff and
+}
+
+
+#define macro POP_COUNT_WRAPPER() = takes (0) returns (0) {
+	0x04 calldataload	// [x]		
+	POP_COUNT()
 	0x00 mstore
 	0x20 0x00 return
 }
-
 
 #define macro MAIN() = takes (0) returns (0) {
 	0x00 calldataload 0xE0 shr
@@ -95,5 +99,5 @@
 	safeMulti:
 		SAFE_MULTI()
 	popCount:
-		POP_COUNT()
+		POP_COUNT_WRAPPER()
 }
