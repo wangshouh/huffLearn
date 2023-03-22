@@ -40,10 +40,20 @@ contract mathTest is Test {
         uint256 result = huffmath.safeMulti(100, 0);
         assertEq(result, 0);
     }
+
+    function test_popCount() public {
+        uint256 maxResult = huffmath.popCount(type(uint256).max);
+        assertEq(maxResult, 256);
+        uint256 minResult = huffmath.popCount(1);
+        assertEq(minResult, 1);
+        uint256 normalResult = huffmath.popCount(42);
+        assertEq(normalResult, 3);
+    }
 }
 
 interface HuffMath {
     function addNumbers(uint256, uint256) external pure returns (uint256);
     function safeAdd(uint256, uint256) external pure returns (uint256);
     function safeMulti(uint256, uint256) external pure returns (uint256);
+    function popCount(uint256) external pure returns (uint256);
 }

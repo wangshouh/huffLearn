@@ -1,6 +1,8 @@
 #define function addNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function safeAdd(uint256,uint256) nonpayable returns (uint256)
 #define function safeMulti(uint256,uint256) nonpayable returns (uint256)
+#define function popCount(uint256) nonpayable returns (uint256)
+
 
 #define macro NON_SAFE_ADD() = takes (0) returns (0) {
 	0x04 calldataload	// [num1]
@@ -47,7 +49,35 @@
 		0x00 0x00 revert
 }
 
-
+#define macro POP_COUNT() = takes (0) returns (0) {
+	0x04 calldataload	// [x]
+	dup1				// [x, x]
+	0x01 shr			// [x >> 1, x]
+	0x5555555555555555555555555555555555555555555555555555555555555555
+	and swap1			// [x, (x >> 1) & 0x5]
+	sub
+	dup1				// [x, x]
+	0x3333333333333333333333333333333333333333333333333333333333333333
+	and 				// [x & 3, x]
+	swap1 0x02 shr		// [x >> 2, x & 3]
+	0x3333333333333333333333333333333333333333333333333333333333333333
+	and add 			// [x]
+	dup1				// [x, x]
+	0x04 shr			// [x >> 4, x]
+	add 				// [x + x >> 4]
+	0x0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F
+	and 				// [x]
+	dup1				// [x, x]
+	0x08 shr			// [x >> 0x08, x]
+	add 				// [x + (x >> 0x08)]
+	dup1 0x10 shr add
+	dup1 0x20 shr add
+	dup1 0x40 shr add
+	dup1 0x80 shr add
+	0x1ff and
+	0x00 mstore
+	0x20 0x00 return
+}
 
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -56,6 +86,7 @@
 	dup1 __FUNC_SIG(addNumbers) eq addNumbers jumpi
 	dup1 __FUNC_SIG(safeAdd)	eq safeAdd jumpi
 	dup1 __FUNC_SIG(safeMulti)	eq safeMulti jumpi
+	dup1 __FUNC_SIG(popCount)	eq popCount jumpi
 
 	addNumbers:
 		NON_SAFE_ADD()
@@ -63,4 +94,6 @@
 		SAFE_ADD()
 	safeMulti:
 		SAFE_MULTI()
+	popCount:
+		POP_COUNT()
 }
