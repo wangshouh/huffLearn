@@ -49,6 +49,13 @@ contract mathTest is Test {
         uint256 normalResult = huffmath.popCount(42);
         assertEq(normalResult, 3);
     }
+
+    function test_nlzCount() public {
+        uint256 maxResult = huffmath.nlzCount(type(uint256).max);
+        assertEq(maxResult, 0);
+        uint256 normalResult = huffmath.nlzCount(0x18160ddd);
+        assertEq(normalResult, 227);
+    }
 }
 
 interface HuffMath {
@@ -56,4 +63,5 @@ interface HuffMath {
     function safeAdd(uint256, uint256) external pure returns (uint256);
     function safeMulti(uint256, uint256) external pure returns (uint256);
     function popCount(uint256) external pure returns (uint256);
+    function nlzCount(uint256) external pure returns (uint256);
 }
