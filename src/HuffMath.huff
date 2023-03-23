@@ -2,6 +2,7 @@
 #define function safeAdd(uint256,uint256) nonpayable returns (uint256)
 #define function safeMulti(uint256,uint256) nonpayable returns (uint256)
 #define function popCount(uint256) nonpayable returns (uint256)
+#define function nlzCount(uint256) nonpayable returns (uint256)
 
 
 #define macro NON_SAFE_ADD() = takes (0) returns (0) {
@@ -69,6 +70,8 @@
 	dup1				// [x, x]
 	0x08 shr			// [x >> 0x08, x]
 	add 				// [x + (x >> 0x08)]
+	0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF
+	and
 	dup1 0x10 shr add
 	dup1 0x20 shr add
 	dup1 0x40 shr add
@@ -76,6 +79,22 @@
 	0x1ff and
 }
 
+
+#define macro NLZ_COUNT() = takes (0) returns (0) {
+	0x04 calldataload	// [x]
+	dup1 0x01 shr or
+	dup1 0x02 shr or
+	dup1 0x04 shr or
+	dup1 0x08 shr or
+	dup1 0x10 shr or
+	dup1 0x20 shr or
+	dup1 0x40 shr or
+	dup1 0x80 shr or
+	not
+	POP_COUNT()
+	0x00 mstore
+	0x20 0x00 return
+}
 
 #define macro POP_COUNT_WRAPPER() = takes (0) returns (0) {
 	0x04 calldataload	// [x]		
@@ -91,6 +110,7 @@
 	dup1 __FUNC_SIG(safeAdd)	eq safeAdd jumpi
 	dup1 __FUNC_SIG(safeMulti)	eq safeMulti jumpi
 	dup1 __FUNC_SIG(popCount)	eq popCount jumpi
+	dup1 __FUNC_SIG(nlzCount)	eq nlzCount jumpi
 
 	addNumbers:
 		NON_SAFE_ADD()
@@ -100,4 +120,6 @@
 		SAFE_MULTI()
 	popCount:
 		POP_COUNT_WRAPPER()
+	nlzCount:
+		NLZ_COUNT()
 }
