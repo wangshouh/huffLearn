@@ -56,6 +56,15 @@ contract mathTest is Test {
         uint256 normalResult = huffmath.nlzCount(0x18160ddd);
         assertEq(normalResult, 227);
     }
+
+    function test_ilog2() public {
+        uint256 maxResult = huffmath.ilog2(type(uint256).max);
+        assertEq(maxResult, 255);
+        uint256 normalResult = huffmath.ilog2(0x18160ddd);
+        assertEq(normalResult, 28);
+        uint256 halfResult = huffmath.ilog2(0x10000000000000000);
+        assertEq(halfResult, 64);
+    }
 }
 
 interface HuffMath {
@@ -64,4 +73,5 @@ interface HuffMath {
     function safeMulti(uint256, uint256) external pure returns (uint256);
     function popCount(uint256) external pure returns (uint256);
     function nlzCount(uint256) external pure returns (uint256);
+    function ilog2(uint256) external pure returns (uint256);
 }
