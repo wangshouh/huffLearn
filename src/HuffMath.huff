@@ -120,6 +120,98 @@
 	0x20 0x00 return
 }
 
+#define macro NLZ_COUNT() = takes(1) returns (1) {
+	dup1				// [x, x]
+	iszero				// [is_zero, x]
+	zero_return jumpi
+
+
+	0x1 				// [n, x]
+	swap1				// [x, n]
+
+	dup1				// [x, x, n]
+	0x80 shr			// [x >> 128, x, n]
+	iszero iszero		// [x >> 128 != 0, x, n]
+	not_zero_128 jumpi	// [x, n]
+	0x80 shl			// [x << 128, n]
+	swap1 0x80 add 		// [n + 128, x << 128]
+	swap1				// [x, n]
+
+	not_zero_128:	
+
+	dup1				// [x, x, n]
+	0xc0 shr			// [x >> 192, x, n]
+	iszero iszero		// [x >> 192 != 0, x, n]
+	not_zero_192 jumpi	// [x, n]
+	0x40 shl			// [x << 64, n]
+	swap1 0x40 add 		// [n + 64, x << 64]
+	swap1				// [x, n]
+
+	not_zero_192:
+
+	dup1				// [x, x, n]
+	0xe0 shr			// [x >> 224, x, n]
+	iszero iszero		// [x >> 224 != 0, x, n]
+	not_zero_224 jumpi	// [x, n]
+	0x20 shl			// [x << 32, n]
+	swap1 0x20 add 		// [n + 32, x << 32]
+	swap1				// [x, n]
+
+	not_zero_224:	
+
+	dup1				// [x, x, n]
+	0xf0 shr			// [x >> 240, x, n]
+	iszero iszero		// [x >> 240 != 0, x, n]
+	not_zero_240 jumpi	// [x, n]
+	0x10 shl			// [x << 16, n]
+	swap1 0x10 add 		// [n + 16, x << 16]
+	swap1				// [x, n]
+
+	not_zero_240:
+
+	dup1				// [x, x, n]
+	0xf8 shr			// [x >> 248, x, n]
+	iszero iszero		// [x >> 248 != 0, x, n]
+	not_zero_248 jumpi	// [x, n]
+	0x08 shl			// [x << 8, n]
+	swap1 0x08 add 		// [n + 8, x << 8]
+	swap1				// [x, n]
+
+	not_zero_248:	
+
+	dup1				// [x, x, n]
+	0xfc shr			// [x >> 252, x, n]
+	iszero iszero		// [x >> 252 != 0, x, n]
+	not_zero_252 jumpi	// [x, n]
+	0x04 shl			// [x << 4, n]
+	swap1 0x04 add 		// [n + 4, x << 4]
+	swap1				// [x, n]
+
+	not_zero_252:		
+
+	dup1				// [x, x, n]
+	0xfe shr			// [x >> 254, x, n]
+	iszero iszero		// [x >> 254 != 0, x, n]
+	not_zero_254 jumpi	// [x, n]
+	0x02 shl			// [x << 2, n]
+	swap1 0x02 add 		// [n + 2, x << 2]
+	swap1				// [x, n]
+
+	not_zero_254:
+	0xff shr			// [x >> 255, n]
+	swap1 sub			
+
+	zero_return:
+	0x100
+}
+
+#define macro NLZ_COUNT_WRAPPER() = takes (0) returns (0) {
+	0x04 calldataload	// [x]
+	NLZ_COUNT()
+	0x00 mstore
+	0x20 0x00 return
+}
+
 #define macro MAIN() = takes (0) returns (0) {
 	0x00 calldataload 0xE0 shr
 
@@ -139,7 +231,7 @@
 	popCount:
 		POP_COUNT_WRAPPER()
 	nlzCount:
-		NLZ_COUNT()
+		NLZ_COUNT_WRAPPER()
 	ilog2:
 		ILOG2()
 }

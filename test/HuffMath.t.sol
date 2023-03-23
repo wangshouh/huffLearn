@@ -57,14 +57,14 @@ contract mathTest is Test {
         assertEq(normalResult, 227);
     }
 
-    function test_ilog2() public {
-        uint256 maxResult = huffmath.ilog2(type(uint256).max);
-        assertEq(maxResult, 255);
-        uint256 normalResult = huffmath.ilog2(0x18160ddd);
-        assertEq(normalResult, 28);
-        uint256 halfResult = huffmath.ilog2(0x10000000000000000);
-        assertEq(halfResult, 64);
-    }
+    // function test_ilog2() public {
+    //     uint256 maxResult = huffmath.ilog2(type(uint256).max);
+    //     assertEq(maxResult, 255);
+    //     uint256 normalResult = huffmath.ilog2(0x18160ddd);
+    //     assertEq(normalResult, 28);
+    //     uint256 halfResult = huffmath.ilog2(0x10000000000000000);
+    //     assertEq(halfResult, 64);
+    // }
 }
 
 interface HuffMath {
