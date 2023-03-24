@@ -57,14 +57,27 @@ contract mathTest is Test {
         assertEq(normalResult, 227);
     }
 
-    // function test_ilog2() public {
-    //     uint256 maxResult = huffmath.ilog2(type(uint256).max);
-    //     assertEq(maxResult, 255);
-    //     uint256 normalResult = huffmath.ilog2(0x18160ddd);
-    //     assertEq(normalResult, 28);
-    //     uint256 halfResult = huffmath.ilog2(0x10000000000000000);
-    //     assertEq(halfResult, 64);
-    // }
+    function test_ilog2() public {
+        uint256 maxResult = huffmath.ilog2(type(uint256).max);
+        assertEq(maxResult, 255);
+        uint256 normalResult = huffmath.ilog2(0x18160ddd);
+        assertEq(normalResult, 28);
+        uint256 halfResult = huffmath.ilog2(0x10000000000000000);
+        assertEq(halfResult, 64);
+    }
+
+    function test_sqrt() public {
+        uint256 huffResult = huffmath.sqrt(4901266436770971757601341183870596);
+
+        // string[] memory inputs = new string[](3);
+        // inputs[0] = "python3";
+        // inputs[1] = "sqrtTest.py";
+        // inputs[2] = vm.toString(n);
+
+        // bytes memory sqrtBytes = vm.ffi(inputs);
+        // uint256 sqrtResult = uint256(bytes32(sqrtBytes));
+        assertEq(70009045392513186, huffResult);
+    }
 }
 
 interface HuffMath {
@@ -74,4 +87,5 @@ interface HuffMath {
     function popCount(uint256) external pure returns (uint256);
     function nlzCount(uint256) external pure returns (uint256);
     function ilog2(uint256) external pure returns (uint256);
+    function sqrt(uint256) external pure returns (uint256);
 }
