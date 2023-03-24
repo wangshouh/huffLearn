@@ -4,6 +4,7 @@
 #define function popCount(uint256) nonpayable returns (uint256)
 #define function nlzCount(uint256) nonpayable returns (uint256)
 #define function ilog2(uint256) nonpayable returns (uint256)
+#define function sqrt(uint256) nonpayable returns (uint256)
 
 
 #define macro NON_SAFE_ADD() = takes (0) returns (0) {
@@ -80,51 +81,7 @@
 	0x1ff and
 }
 
-#define macro NLZ_COUNT() = takes (0) returns (0) {
-	0x04 calldataload	// [x]
-	dup1 0x01 shr or
-	dup1 0x02 shr or
-	dup1 0x04 shr or
-	dup1 0x08 shr or
-	dup1 0x10 shr or
-	dup1 0x20 shr or
-	dup1 0x40 shr or
-	dup1 0x80 shr or
-	not
-	POP_COUNT()
-	0x00 mstore
-	0x20 0x00 return
-}
-
-#define macro ILOG2() = takes (0) returns (0) {
-	0x04 calldataload	// [x]
-	dup1 0x01 shr or
-	dup1 0x02 shr or
-	dup1 0x04 shr or
-	dup1 0x08 shr or
-	dup1 0x10 shr or
-	dup1 0x20 shr or
-	dup1 0x40 shr or
-	dup1 0x80 shr or
-	POP_COUNT()
-	0x1 				// [1, pop(x)]
-	swap1 sub
-	0x00 mstore
-	0x20 0x00 return	
-}
-
-#define macro POP_COUNT_WRAPPER() = takes (0) returns (0) {
-	0x04 calldataload	// [x]		
-	POP_COUNT()
-	0x00 mstore
-	0x20 0x00 return
-}
-
 #define macro NLZ_COUNT() = takes(1) returns (1) {
-	dup1				// [x, x]
-	iszero				// [is_zero, x]
-	zero_return jumpi
-
 
 	0x1 				// [n, x]
 	swap1				// [x, n]
@@ -200,9 +157,73 @@
 	not_zero_254:
 	0xff shr			// [x >> 255, n]
 	swap1 sub			
+}
 
-	zero_return:
-	0x100
+#define macro ILOG2() = takes (1) returns (1) {
+	NLZ_COUNT()			// [nlz(x)]
+	0xff sub
+}
+
+#define macro SQRT() = takes (0) returns (0) {
+	0x04 calldataload	// [x]
+	dup1				// [x, x]
+	iszero				// [x == 0, x]
+	is_zero jumpi
+	dup1				// [x, x]
+	0x01				// [1, x, x]
+	dup2				// [x, 1, x, x]
+	ILOG2()				// [log2(x), 1, x, x]
+	0x01 shr			// [log2(x) / 2, 1, x, x]
+	shl					// [result, x, x]
+
+	dup1				// [result, result, x, x]
+	swap2 div			// [x / result, result, x]
+	add 				// [x / result + result, x]
+	0x01 shr			// [result, x]
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]		
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]		
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]		
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]		
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]		
+
+	dup1				// [result, result, x]
+	dup3				// [x, result, result, x]
+	div add 0x01 shr	// [result, x]
+
+	dup2 dup2			// [result, x, result, x] 			
+	gt 					// [result > x, result, x]
+	min_pop jumpi		// [result, x]
+	swap1				// [x, result]
+
+	min_pop:
+	pop
+
+	is_zero:
+
+	0x00 mstore
+	0x20 0x00 return	
+}
+
+#define macro POP_COUNT_WRAPPER() = takes (0) returns (0) {
+	0x04 calldataload	// [x]		
+	POP_COUNT()
+	0x00 mstore
+	0x20 0x00 return
 }
 
 #define macro NLZ_COUNT_WRAPPER() = takes (0) returns (0) {
@@ -210,6 +231,13 @@
 	NLZ_COUNT()
 	0x00 mstore
 	0x20 0x00 return
+}
+
+#define macro ILOG2_WRAPPER() = takes (0) returns (0) {
+	0x04 calldataload	// [x]
+	ILOG2()
+	0x00 mstore
+	0x20 0x00 return	
 }
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -221,6 +249,7 @@
 	dup1 __FUNC_SIG(popCount)	eq popCount jumpi
 	dup1 __FUNC_SIG(nlzCount)	eq nlzCount jumpi
 	dup1 __FUNC_SIG(ilog2)		eq ilog2 jumpi
+	dup1 __FUNC_SIG(sqrt) 		eq sqrt jumpi 
 
 	addNumbers:
 		NON_SAFE_ADD()
@@ -233,5 +262,7 @@
 	nlzCount:
 		NLZ_COUNT_WRAPPER()
 	ilog2:
-		ILOG2()
+		ILOG2_WRAPPER()
+	sqrt:
+		SQRT()
 }
