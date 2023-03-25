@@ -5,6 +5,7 @@
 #define function nlzCount(uint256) nonpayable returns (uint256)
 #define function ilog2(uint256) nonpayable returns (uint256)
 #define function sqrt(uint256) nonpayable returns (uint256)
+#define function sum(uint256[]) nonpayable returns (uint256)
 
 
 #define macro NON_SAFE_ADD() = takes (0) returns (0) {
@@ -240,6 +241,56 @@
 	0x20 0x00 return	
 }
 
+#define macro SUM() = takes(0) returns (0) {
+	0x24 calldataload	// [length]
+
+	0x01				// [readed, length] fix readed
+
+	0x00 				// [sum, readed, length] 
+	0x64 swap1			// [sum, next, readed, length] fix next
+	0x44				// [now, sum, next, readed, length]
+
+	calldataload		// [element, sum, next, readed, length]
+
+	add 				// [sum, next, readed, length] add sum
+	dup4 dup4			// [readed, length, sum, next, readed, length]
+	lt 					// [readed < length, sum, next, readed, length]
+	iszero
+	array_end jumpi		// [sum, now, readed, length]
+
+	array_for:			// [sum, now, readed, length]
+
+	dup2 calldataload	// [element, sum, now, readed, length]
+	add 				// [sum, now, readed, length] add sum
+
+	swap1 0x20 add		// [next, sum, readed, length] fix next
+	swap2 0x01 add 		// [readed, sum, next, length] fix readed
+
+	swap1				// [sum, readed, next, length]
+	dup4 dup3 lt 		// [readed < length, sum, readed, next, length]
+	iszero
+	array_end jumpi		// [sum, readed, now, length]
+
+
+	dup3 calldataload	// [element, sum, readed, now, length]
+	add 				// [sum, readed, now, length] 	add sum
+	swap2 0x20 add 		// [next, readed, sum, length]	fix next
+	swap1 0x01 add 		// [readed, next, sum, length]	fix readed
+	swap2				// [sum, next, readed, length]
+
+	dup4 dup4			// [readed, length, sum, next, readed, length]
+	lt 					// [readed < length, sum, next, readed, length]
+	iszero
+	array_end jumpi		// [sum, now, readed, length]
+
+	array_for jump
+
+	array_end:
+	0x00 mstore
+	0x20 0x00 return
+}
+
+
 #define macro MAIN() = takes (0) returns (0) {
 	0x00 calldataload 0xE0 shr
 
@@ -250,6 +301,7 @@
 	dup1 __FUNC_SIG(nlzCount)	eq nlzCount jumpi
 	dup1 __FUNC_SIG(ilog2)		eq ilog2 jumpi
 	dup1 __FUNC_SIG(sqrt) 		eq sqrt jumpi 
+	dup1 __FUNC_SIG(sum) eq sum jumpi
 
 	addNumbers:
 		NON_SAFE_ADD()
@@ -265,4 +317,6 @@
 		ILOG2_WRAPPER()
 	sqrt:
 		SQRT()
+	sum:
+		SUM()
 }

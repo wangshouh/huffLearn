@@ -78,6 +78,18 @@ contract mathTest is Test {
         // uint256 sqrtResult = uint256(bytes32(sqrtBytes));
         assertEq(70009045392513186, huffResult);
     }
+
+
+    function test_sum() public {
+        uint256[] memory oneArrary = new uint256[](5);
+        oneArrary[0] = 42;
+        oneArrary[1] = 22;
+        oneArrary[2] = 16;
+        oneArrary[3] = 20;
+        oneArrary[4] = 120;
+        uint256 huffResult = huffmath.sum(oneArrary);
+        assertEq(huffResult, 220);
+    }
 }
 
 interface HuffMath {
@@ -88,4 +100,5 @@ interface HuffMath {
     function nlzCount(uint256) external pure returns (uint256);
     function ilog2(uint256) external pure returns (uint256);
     function sqrt(uint256) external pure returns (uint256);
+    function sum(uint256[] calldata) external returns (uint256);
 }
